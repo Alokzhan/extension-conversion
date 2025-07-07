@@ -3,23 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <title>Register - File Converter</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://kit.fontawesome.com/a2e0d5d26d.js" crossorigin="anonymous"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #d4fc79, #96e6a1); /* light green to mint gradient */
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .register-card {
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 420px;
+    }
+
+    h2 {
+      font-weight: 700;
+      margin-bottom: 25px;
+      color: #28a745;
+    }
+
+    .form-label {
+      font-weight: 500;
+    }
+
+    .btn-success {
+      width: 100%;
+    }
+
+    .form-footer {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+  </style>
 </head>
-<body class="bg-light">
-<div class="container mt-5">
-  <h2 class="text-center">Register</h2>
-  <form method="POST" class="col-md-6 mx-auto">
-    <div class="mb-3">
-      <label>Username</label>
-      <input name="username" class="form-control" required>
-    </div>
-    <div class="mb-3">
-      <label>Password</label>
-      <input type="password" name="password" class="form-control" required>
-    </div>
-    <button class="btn btn-success">Register</button>
-    <a href="/login" class="btn btn-link">Login</a>
-  </form>
-</div>
+<body>
+  <div class="register-card">
+    <h2 class="text-center"><i class="fas fa-user-plus me-2"></i>Register</h2>
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input name="username" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" required>
+      </div>
+      <button class="btn btn-success">Register</button>
+      <div class="form-footer">
+        Already have an account? <a href="/login" class="text-decoration-none">Login</a>
+      </div>
+    </form>
+  </div>
 </body>
 </html>

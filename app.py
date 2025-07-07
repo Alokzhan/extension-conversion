@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, render_template, request, send_file, redirect, url_for, session, flash
 from werkzeug.utils import secure_filename
 from PyPDF2 import PdfMerger
@@ -10,10 +9,12 @@ import sqlite3
 
 app = Flask(__name__)
 app.secret_key = 'secret'
+
 UPLOAD_FOLDER = 'uploads'
 RESULT_FOLDER = 'results'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
+
 
 # === Database Setup ===
 def init_db():
@@ -32,12 +33,15 @@ def init_db():
                     )''')
         con.commit()
 
+
 init_db()
+
 
 # === Routes ===
 @app.route('/')
 def home():
     return render_template('index.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -52,8 +56,9 @@ def login():
                 session['user_id'] = user[0]
                 return redirect(url_for('dashboard'))
             else:
-                flash('Invalid credentials')
+                flash('Invalid username or password.')
     return render_template('login.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -65,11 +70,12 @@ def register():
                 cur = con.cursor()
                 cur.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
                 con.commit()
-                flash('Registered successfully')
+                flash('Registration successful! Please log in.')
                 return redirect(url_for('login'))
         except sqlite3.IntegrityError:
-            flash('Username already exists')
+            flash('Username already exists. Please choose another.')
     return render_template('register.html')
+
 
 @app.route('/dashboard')
 def dashboard():
@@ -77,10 +83,13 @@ def dashboard():
         return redirect(url_for('login'))
     return render_template('dashboard.html')
 
+
 @app.route('/convert/pdf-to-doc', methods=['POST'])
 def pdf_to_doc():
     if 'file' not in request.files:
-        return 'No file uploaded'
+        flash('No file uploaded.')
+        return redirect(url_for('dashboard'))
+
     pdf = request.files['file']
     filename = secure_filename(pdf.filename)
     input_path = os.path.join(UPLOAD_FOLDER, filename)
@@ -88,9 +97,9 @@ def pdf_to_doc():
     pdf.save(input_path)
 
     pdf2docx.parse(pdf_file=input_path, docx_file=output_path)
-
     log_history('PDF to DOC', output_path)
     return send_file(output_path, as_attachment=True)
+
 
 @app.route('/convert/doc-to-txt', methods=['POST'])
 def doc_to_txt():
@@ -107,6 +116,7 @@ def doc_to_txt():
     log_history('DOC to TXT', output_path)
     return send_file(output_path, as_attachment=True)
 
+
 @app.route('/convert/img-to-jpg', methods=['POST'])
 def img_to_jpg():
     img = request.files['file']
@@ -122,20 +132,35 @@ def img_to_jpg():
     log_history('Image to JPG', output_path)
     return send_file(output_path, as_attachment=True)
 
+
 @app.route('/merge/pdf', methods=['POST'])
 def merge_pdf():
     files = request.files.getlist('files')
+    if not files or len(files) < 2:
+        flash("Please select at least 2 PDF files to merge.")
+        return redirect(url_for('dashboard'))
+
     merger = PdfMerger()
+    saved_files = []
+
     for f in files:
-        path = os.path.join(UPLOAD_FOLDER, secure_filename(f.filename))
-        f.save(path)
-        merger.append(path)
+        if f and f.filename.lower().endswith('.pdf'):
+            path = os.path.join(UPLOAD_FOLDER, secure_filename(f.filename))
+            f.save(path)
+            saved_files.append(path)
+            merger.append(path)
+
+    if not saved_files:
+        flash("No valid PDF files were uploaded.")
+        return redirect(url_for('dashboard'))
+
     output_path = os.path.join(RESULT_FOLDER, 'merged.pdf')
     merger.write(output_path)
     merger.close()
 
     log_history('PDF Merge', output_path)
     return send_file(output_path, as_attachment=True)
+
 
 @app.route('/history')
 def history():
@@ -147,12 +172,14 @@ def history():
         logs = cur.fetchall()
     return render_template('history.html', logs=logs)
 
+
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# === Log Helper ===
+
+# === Logging Helper ===
 def log_history(action, filename):
     if 'user_id' in session:
         with sqlite3.connect('db.sqlite3') as con:
@@ -161,7 +188,6 @@ def log_history(action, filename):
                         (session['user_id'], action, os.path.basename(filename)))
             con.commit()
 
+
 if __name__ == '__main__':
-    import os
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)

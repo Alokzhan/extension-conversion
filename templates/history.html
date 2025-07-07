@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Conversion History</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-4">
+  <h2 class="text-center">Conversion History</h2>
+  <a href="/dashboard" class="btn btn-secondary mb-3">← Back to Dashboard</a>
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Action</th>
+        <th>Filename</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for action, filename in logs %}
+      <tr>
+        <td>{{ action }}</td>
+        <td>{{ filename }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</body>
+</html>
